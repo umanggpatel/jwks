@@ -2,6 +2,7 @@
 from cryptography.hazmat.primitives.asymmetric import rsa as myrsa
 from cryptography.hazmat.primitives import serialization as serial
 import base64 as b64
+from http.server import BaseHTTPRequestHandler as handler, HTTPServer as server
 
 host= "127.0.0.1"
 port=8080
@@ -21,3 +22,13 @@ active_pem, inactive_pem =[
     )
     for key_object in (privatekey, expiredkey)
 ] 
+
+class AuthService(handler):
+    def reject(self):
+        self.send_response(405)
+        self.end_headers()
+
+    do_HEAD = do_DELETE = do_PUT = do_PATCH = reject
+
+
+
