@@ -3,10 +3,14 @@ from cryptography.hazmat.primitives.asymmetric import rsa as myrsa
 from cryptography.hazmat.primitives import serialization as serial
 import base64 as b64
 from http.server import BaseHTTPRequestHandler as handler, HTTPServer as server
+from datetime import datetime, timedelta, timezone
+import jwt
+from urllib.parse import urlparse as urlp, parse_qs as parqs
+import json
+
 
 host= "127.0.0.1"
 port=8080
-
 
 def encoded_base64(number):
     b=number.to_bytes((number.bit_length()+7)//8,'big')
@@ -30,5 +34,20 @@ class AuthService(handler):
 
     do_HEAD = do_DELETE = do_PUT = do_PATCH = reject
 
+    def do_GET(self):
+        if self.path == "/.well-known/jwks.json":
+            self.send_response(200)
+            self.send_header("Content-type", "text/plain")
+            self.end_headers()
+            pub = priv_num.public_numbers
+            data = {"keys": [{"alg": "RS256", "kty": "RSA", "use": "sig", "kid": "goodKID", "n": encoded_base64(pub.n), "e": encoded_base64(pub.e)}]}
+            self.wfile.write(json.dumps(data).encode())
+        else:
+            self.reject()
 
+    
+
+
+
+   
 
