@@ -61,13 +61,14 @@ class AuthService(handler):
         self.send_response(200)
         self.end_headers()
         self.wfile.write(str(token).encode())
-
-       
     
-
-    
-
-
-
-   
-
+def run_server():
+    webserver = server((host, port), AuthService)
+    print(f"The server is active")
+    try:
+        webserver.serve_forever()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        webserver.server_close()
+run_server()
