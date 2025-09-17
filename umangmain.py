@@ -37,7 +37,7 @@ class AuthService(handler):
     def do_GET(self):
         if self.path == "/.well-known/jwks.json":
             self.send_response(200)
-            self.send_header("Content-type", "text/plain")
+            self.send_header("Content-type", "application/json")
             self.end_headers()
             pub = priv_num.public_numbers
             data = {"keys": [{"alg": "RS256", "kty": "RSA", "use": "sig", "kid": "goodKID", "n": encoded_base64(pub.n), "e": encoded_base64(pub.e)}]}
@@ -60,7 +60,7 @@ class AuthService(handler):
 
         self.send_response(200)
         self.end_headers()
-        self.wfile.write(str(token).encode())
+        self.wfile.write(token.encode())
     
 def run_server():
     webserver = server((host, port), AuthService)
