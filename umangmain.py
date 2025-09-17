@@ -44,6 +44,26 @@ class AuthService(handler):
             self.wfile.write(json.dumps(data).encode())
         else:
             self.reject()
+    def do_POST(self):
+        parsed = urlp(self.path)
+        if parsed.path != "/auth":
+            return self.reject()
+
+        expired = 'expired' in parqs(parsed.query)
+        headers = {"kid": "expiredKID" if expired else "goodKID"}
+        payload = {
+            "user": "username",
+            "exp": datetime.now(timezone.utc) + (-timedelta(hours=1) if expired else timedelta(hours=1))
+        }
+        key = inactive_pem if expired else active_pem
+        token = jwt.encode(payload, key, algorithm="RS256", headers=headers)
+
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(str(token).encode())
+
+       
+    
 
     
 
