@@ -8,10 +8,10 @@ import jwt
 from urllib.parse import urlparse as urlp, parse_qs as parqs
 import json
 
+host= "127.0.0.1"#localhost 
+port=8080#portnumber
 
-host= "127.0.0.1"
-port=8080
-
+# Encode RSA integer to Base64URL string for JWKS JSON
 def encoded_base64(number):
     b=number.to_bytes((number.bit_length()+7)//8,'big')
     return b64.urlsafe_b64encode(b).rstrip(b'=').decode()
@@ -26,14 +26,15 @@ active_pem, inactive_pem =[
     )
     for key_object in (privatekey, expiredkey)
 ] 
-
+#class having all methods to handle HTTP services
 class AuthService(handler):
     def reject(self):
         self.send_response(405)
         self.end_headers()
 
-    do_HEAD = do_DELETE = do_PUT = do_PATCH = reject
+    do_HEAD = do_DELETE = do_PUT = do_PATCH = reject  # Reject (Error 405) unsupported HTTP methods for JWKS server
 
+#Handles GET requests and serves JWKS contaninng public keys
     def do_GET(self):
         if self.path == "/.well-known/jwks.json":
             self.send_response(200)
@@ -44,6 +45,7 @@ class AuthService(handler):
             self.wfile.write(json.dumps(data).encode())
         else:
             self.reject()
+    #Handles POST requests to /auth and issue JWTs
     def do_POST(self):
         parsed = urlp(self.path)
         if parsed.path != "/auth":
@@ -61,7 +63,7 @@ class AuthService(handler):
         self.send_response(200)
         self.end_headers()
         self.wfile.write(token.encode())
-    
+    #Function to start and run the server
 def run_server():
     webserver = server((host, port), AuthService)
     print(f"The server is active")
@@ -72,3 +74,10 @@ def run_server():
     finally:
         webserver.server_close()
 run_server()
+""""
+For this assignment I used AI tools such as ChatGPT to some extent, mainly to understand the concept, fix some errors, and get suggestiona on how the code could improved. This was for learning purpose and the prompts used with my code were:
+Which Python libraries are useful for building a server like this?
+How can I structure this server code better?
+What can I add next to improve this part of the code?
+How can I implement key expiry properly?
+"""
