@@ -6,12 +6,14 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urlparse, parse_qs
 
+# Server configuration: host, port, and database file path.
 HOST = "127.0.0.1"
 PORT = 8080
 DB_FILE = "totally_not_my_privateKeys.db"
 
-def init_db():
-    
+# Fetches a single key (expired or valid) or all valid keys from the database.
+
+def init_db():    
     conn = sqlite3.connect(DB_FILE)
     cur = conn.cursor()
     cur.execute("""
@@ -33,6 +35,7 @@ def save_key(key_pem: str, exp_ts: int):
     conn.commit()
     conn.close()
 
+# Fetches a single key (expired or valid) or all valid keys from the database.
 def read_key(expired=False):
     now = int(datetime.now(timezone.utc).timestamp())
     conn = sqlite3.connect(DB_FILE)
@@ -86,6 +89,7 @@ if count == 0:
     generate_and_store_keys()
 
 
+# Sends a 405 response for invalid HTTP requests.
 
 class AuthService(BaseHTTPRequestHandler):
     def reject(self):
@@ -94,7 +98,7 @@ class AuthService(BaseHTTPRequestHandler):
 
 
     do_HEAD = do_DELETE = do_PUT = do_PATCH = reject
-
+# Handles GET requests and returns the JWKS JSON with valid public keys.
     def do_GET(self):
         parsed = urlparse(self.path)
         if parsed.path != "/.well-known/jwks.json":
@@ -145,7 +149,7 @@ class AuthService(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(token.encode())
 
-
+# Starts the HTTP server and handles requests until stopped.
 def run_server():
     webserver = HTTPServer((HOST, PORT), AuthService)
     print(f"Server is active")
