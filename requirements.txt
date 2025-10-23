@@ -1,0 +1,19 @@
+Main Code: 
+Requirements: python: 3.10+
+
+library: cryptography, PyJWT
+
+standard library: sqlite3, base64, http.server, json, os, datetime, urllib.parse
+
+
+Test Code:
+python: 3.10+
+
+library: threading, time, requests, sqlite3, http.server
+
+standard library: datetime, timedelta, timezone
+
+project modules: (AuthService, HOST, PORT, init_db, DB_FILE, save_key, generate_and_store_keys, encoded_base64)
+
+
+
